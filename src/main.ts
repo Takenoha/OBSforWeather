@@ -40,8 +40,8 @@ fetch(url)
 
         const imgElement = document.createElement('img');
         imgElement.alt = 'Weather Image';
-       imgElement.style.width = '100px';  // 任意のサイズ
-       imgElement.style.height = '100px'; // 任意のサイズ
+        imgElement.style.width = '100px';  // 任意のサイズ
+        imgElement.style.height = '100px'; // 任意のサイズ
         const imageContainer = document.getElementById('weatherImage');
         if (imageContainer) {
            imageContainer.appendChild(imgElement); // 画像要素を挿入
@@ -49,7 +49,7 @@ fetch(url)
         let currentIndex = 0;
 
         // 画像を一定時間ごとに切り替える関数
-        function changeImage() {
+        async function changeImage() {
             if (currentIndex >= weatherCodes.length) {
                 currentIndex = 0; // インデックスをリセット
             }
