@@ -1,3 +1,4 @@
+import weatherMatchID from 'weatherCode.json';
 // 東京(130000)の予報を取得
 let url: string = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json";
 
@@ -35,9 +36,20 @@ fetch(url)
         document.getElementById("tomorrow")!.lastElementChild!.textContent = area.weathers[1];
         document.getElementById("dayAfterTomorrow")!.lastElementChild!.textContent = area.weathers[2];
         document.getElementById("weatherCodes")!.lastElementChild!.textContent = area.weatherCodes.join(', ');
-
-        const weatherCodes: string[] = weather[0].timeSeries[0].areas[0].weatherCodes; 
-
+        
+        //天気コードを取得、天気コードに対応する画像をURLから取得
+        const weatherCodes: string[] = weather[0].timeSeries[0].areas[0].weatherCodes;
+        const imgId: string[]=[];
+        for (let index = 0 ;index < weatherCodes.length; index++){
+                let tmp = weatherMatchID[parseInt(weatherCodes[index])]
+                if (tmp) {
+                    imgId[index] = tmp.icon;
+                } else {
+                    console.error(`No icon found for weather code: ${weatherCodes}`);
+                }
+        }
+        
+        //天気画像表示
         const imgElement = document.createElement('img');
         imgElement.alt = 'Weather Image';
         imgElement.style.width = '100px';  // 任意のサイズ
@@ -53,8 +65,8 @@ fetch(url)
             if (currentIndex >= weatherCodes.length) {
                 currentIndex = 0; // インデックスをリセット
             }
-            const weatherCode = weatherCodes[currentIndex];
-            const imageUrl: string = `https://www.jma.go.jp/bosai/forecast/img/${weatherCode}.svg`;
+            const imgNow = imgId[currentIndex];
+            const imageUrl: string = `https://www.jma.go.jp/bosai/forecast/img/${imgNow}`;
             imgElement.src = imageUrl; // 画像を更新
             currentIndex++;
         }
@@ -66,3 +78,5 @@ fetch(url)
         setInterval(changeImage, 5000);
     })
     .catch(error => console.error('Error fetching weather data:', error));
+
+    
