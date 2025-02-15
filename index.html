@@ -10,7 +10,7 @@
         body {
             font-family: 'M PLUS 1p', sans-serif;
             text-align: center;
-            color: #000;
+            color: #808080; /* フォントの色をグレーに変更 */
         }
 
         #weather {
@@ -22,19 +22,88 @@
             display: inline-block;
             margin-top: 20px;
         }
+
+        #weather-icon {
+            width: 50px;
+            height: 50px;
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            filter: grayscale(100%); /* 画像の色をグレーに変更 */
+        }
+
+        .checkbox-container {
+            margin-top: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .checkbox-container label {
+            margin-right: 20px;
+        }
     </style>
 </head>
 <body>
     <div id="weather">天気情報を取得中...</div>
+    <img id="weather-icon" src="" alt="天気アイコン" style="display:none;">
+
+    <div class="checkbox-container">
+        <label><input type="checkbox" value="大阪" checked> 大阪</label>
+        <label><input type="checkbox" value="東京" checked> 東京</label>
+        <label><input type="checkbox" value="札幌" checked> 札幌</label>
+        <label><input type="checkbox" value="ニューヨーク" checked> ニューヨーク</label>
+        <label><input type="checkbox" value="ロンドン" checked> ロンドン</label>
+        <label><input type="checkbox" value="パリ" checked> パリ</label>
+        <label><input type="checkbox" value="シドニー" checked> シドニー</label>
+        <label><input type="checkbox" value="北京" checked> 北京</label>
+    </div>
 
     <script>
-        const cities = [
+        const allCities = [
             { name: '大阪', lat: 34.6937, lon: 135.5023 },
             { name: '東京', lat: 35.6895, lon: 139.6917 },
-            { name: '札幌', lat: 43.0618, lon: 141.3545 }
+            { name: '札幌', lat: 43.0618, lon: 141.3545 },
+            { name: 'ニューヨーク', lat: 40.7128, lon: -74.0060 },
+            { name: 'ロンドン', lat: 51.5074, lon: -0.1278 },
+            { name: 'パリ', lat: 48.8566, lon: 2.3522 },
+            { name: 'シドニー', lat: -33.8688, lon: 151.2093 },
+            { name: '北京', lat: 39.9042, lon: 116.4074 }
         ];
         let currentIndex = 0;
         let weatherData = [];
+        let selectedCities = [];
+
+        const weatherIcons = {
+            0: 'clear_sky.svg',
+            1: 'partly_cloudy.svg',
+            2: 'partly_cloudy.svg',
+            3: 'overcast.svg',
+            45: 'fog.svg',
+            48: 'fog.svg',
+            51: 'drizzle.svg',
+            53: 'drizzle.svg',
+            55: 'drizzle.svg',
+            56: 'freezing_drizzle.svg',
+            57: 'freezing_drizzle.svg',
+            61: 'rain.svg',
+            63: 'rain.svg',
+            65: 'rain.svg',
+            66: 'freezing_rain.svg',
+            67: 'freezing_rain.svg',
+            71: 'snow.svg',
+            73: 'snow.svg',
+            75: 'snow.svg',
+            77: 'snow_grains.svg',
+            80: 'rain_showers.svg',
+            81: 'rain_showers.svg',
+            82: 'rain_showers.svg',
+            85: 'snow_showers.svg',
+            86: 'snow_showers.svg',
+            95: 'thunderstorm.svg',
+            96: 'thunderstorm_hail.svg',
+            99: 'thunderstorm_hail.svg'
+        };
 
         async function fetchWeather(city) {
             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true`);
@@ -43,22 +112,45 @@
         }
 
         async function fetchAllWeather() {
-            for (const city of cities) {
+            weatherData = [];
+            for (const city of selectedCities) {
                 const weather = await fetchWeather(city);
                 weatherData.push({ city: city.name, temperature: weather.temperature, weathercode: weather.weathercode });
             }
         }
 
         function updateWeather() {
+            if (weatherData.length === 0) return;
             const weather = weatherData[currentIndex];
-            document.getElementById('weather').innerText = `${weather.city} ${weather.temperature}°C, ${weather.weathercode}`;
-            currentIndex = (currentIndex + 1) % cities.length;
+            document.getElementById('weather').innerText = `${weather.city} ${weather.temperature}°C`;
+            const weatherIcon = weatherIcons[weather.weathercode];
+            if (weatherIcon) {
+                document.getElementById('weather-icon').src = `svg/${weatherIcon}`;
+                document.getElementById('weather-icon').style.display = 'block';
+            } else {
+                document.getElementById('weather-icon').style.display = 'none';
+            }
+            currentIndex = (currentIndex + 1) % weatherData.length;
         }
 
-        fetchAllWeather().then(() => {
-            setInterval(updateWeather, 3000);
-            updateWeather();
+        function updateSelectedCities() {
+            selectedCities = [];
+            document.querySelectorAll('.checkbox-container input[type="checkbox"]:checked').forEach(checkbox => {
+                const city = allCities.find(c => c.name === checkbox.value);
+                if (city) selectedCities.push(city);
+            });
+            fetchAllWeather().then(() => {
+                currentIndex = 0;
+                updateWeather();
+            });
+        }
+
+        document.querySelectorAll('.checkbox-container input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedCities);
         });
+
+        updateSelectedCities();
+        setInterval(updateWeather, 3000);
     </script>
 </body>
 </html>
