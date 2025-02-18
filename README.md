@@ -4,3 +4,5 @@ OBSで使用できる天気予報表示です
 使用方法
 OBSのソースに"🌍️ブラウザ"を追加
 URLに index.htmlもしくはindex_jp.htmlのURLを設定
+URL:https://takenoha.github.io/WeatherforOBS/
+
